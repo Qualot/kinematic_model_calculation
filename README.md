@@ -1,7 +1,10 @@
 # kinematic_model_calculation
-The repository for calculating the kinematic model of spring joint with kinematic constraint [LM2025] [SSRR2024] 
+The repository for calculating the ligament length of open joint and kinematic model of spring joint  [LM2025] [SSRR2024] 
 
-![picture](https://raw.githubusercontent.com/username/Qualot/kinematic_model_calculation/Collateral_ligaments.png)
+![cruciate](https://raw.githubusercontent.com/Qualot/kinematic_model_calculation/media/Cruciate_ligaments.png)
+![collateral](https://raw.githubusercontent.com/Qualot/kinematic_model_calculation/media/Collateral_ligaments.png)
+![curve](https://raw.githubusercontent.com/Qualot/kinematic_model_calculation/media/plot.svg)
+
 
 ## Usage
 Installation
