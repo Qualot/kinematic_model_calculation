@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<robot name="two_link_robot">
+
+  <!-- Base -->
+  <link name="base_link"/>
+
+  <!-- Link1 -->
+  <link name="link1">
+    <visual>
+      <origin xyz="0.03536 0.005 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.07071 0.005 0.005"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0.005 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.0025" length="0.005"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.07071 0.005 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.0025" length="0.005"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.03536 0.005 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.07071 0.005 0.005"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0.03536 0.005 0" rpy="0 0 0"/>
+      <mass value="0.01"/>
+
+      <inertia
+        ixx="0.00000217"
+        ixy="0"
+        ixz="0"
+        iyy="0.00002167"
+        iyz="0"
+        izz="0.00002167"/>
+    </inertial>
+  </link>
+
+  <!-- Link2 -->
+  <link name="link2">
+    <visual>
+      <origin xyz="0.025 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.005 0.005"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.0025" length="0.005"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.05 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.0025" length="0.005"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.025 0.005 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.005 0.005"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0.03536 0.005 0" rpy="0 0 0"/>
+      <mass value="0.01"/>
+
+      <inertia
+        ixx="0.00000217"
+        ixy="0"
+        ixz="0"
+        iyy="0.00002167"
+        iyz="0"
+        izz="0.00002167"/>
+    </inertial>
+  </link>
+
+
+  <!-- Link3 -->
+  <link name="ee_link">
+    <visual>
+      <geometry>
+        <mesh filename="./femur.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.8 0.8 0.8 0.8"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.01"/>
+
+      <inertia
+        ixx="0.00000217"
+        ixy="0"
+        ixz="0"
+        iyy="0.00002167"
+        iyz="0"
+        izz="0.00002167"/>
+    </inertial>
+  </link>
+
+  <!-- Joint1 -->
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link1"/>
+
+    <!-- link1 origin -->
+    <origin xyz="-0.025 0 0" rpy="0 0 0"/>
+
+    <axis xyz="0 1 0"/>
+
+    <limit
+      lower="-3.14159"
+      upper="3.14159"
+      effort="10"
+      velocity="10"/>
+  </joint>
+
+  <!-- Joint2 -->
+  <joint name="joint2" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+
+    <!-- link1 tip -->
+    <origin xyz="0.07071 0 0" rpy="0 0 0"/>
+
+    <axis xyz="0 1 0"/>
+
+    <limit
+      lower="-3.14159"
+      upper="3.14159"
+      effort="10"
+      velocity="10"/>
+  </joint>
+
+  <!-- Joint3 -->
+  <joint name="joint3" type="fixed">
+    <parent link="link2"/>
+    <child link="ee_link"/>
+
+    <!-- link2 tip -->
+    <origin xyz="0.025 0 0" rpy="0 3.14159 0"/>
+    <axis xyz="0 1 0"/>
+
+  </joint>
+
+</robot>
