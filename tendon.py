@@ -18,7 +18,7 @@ class Tendon():
         self.keypoints = []
         self.points = []
         self.keysegments = 0
-        self.segments = 61 # m+1
+        self.segments = 31 # m+1. >40 makes the computation too slow for newton method. 
 
         # m floating points
         self.m = self.segments - 1
@@ -188,16 +188,27 @@ class Tendon():
 
         G_tridiag = block_tridiag(N=int(m), block_size=3)
 
+        # conservative. no divergence
+        # k_contact, alpha, iterations = 5.0, 0.01, 200
+
+        # a bit radical. no divergence
+        # k_contact, alpha, iterations = 1.0, 0.02, 100
+
+        # current limitation? no divergence
+        # k_contact, alpha, iterations = 1.0, 0.04, 50
+
+
         k_line = 1.0
-        k_contact = 5.0
+        k_contact = 1.0
         d = k_line / (m**2)
         l_tol = 1e-8
         f_tol = k_line * self.get_length()/np.sqrt(m) * l_tol
-        alpha = .01
+        alpha = .04
 
         # Damped Newton method
         x = iter_points.copy()
-        for i in range(200):
+        iterations = 50
+        for i in range(iterations):
             normals = compute_normals(x.reshape(-1,3), self.wrap._sdf.__call__)
             _, distance = self.wrap._sdf.on_surface(x.reshape(-1,3))
             # distance = np.minimum(distance, 0)
