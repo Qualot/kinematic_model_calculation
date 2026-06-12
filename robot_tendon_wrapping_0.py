@@ -13,7 +13,7 @@ import time
 
 def main():
 
-    robot_model = skrobot.models.urdf.RobotModelFromURDF(urdf_file="rleg.urdf")
+    robot_model = skrobot.models.urdf.RobotModelFromURDF(urdf_file="./urdf/rleg.urdf")
 
     viewer = skrobot.viewers.TrimeshSceneViewer(resolution=(640, 480))
     #viewer = skrobot.viewers.PyrenderViewer()
