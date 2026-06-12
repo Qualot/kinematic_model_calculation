@@ -30,11 +30,11 @@ def main():
     robot_model.tibia.assoc(knee_extensor_tibia, relative_coords='local')
 
     knee_extensor_via_0 = skrobot.model.Box(extents=(0.025, 0.025, 0.025), face_colors=(0.0, 0.75, 0.75, 0.5))
-    knee_extensor_via_0.translate((0.05, 0, -0.3))
+    knee_extensor_via_0.translate((0.1, 0, -0.3))
     robot_model.femur.assoc(knee_extensor_via_0, relative_coords='local')
 
     knee_extensor_via_1 = skrobot.model.Box(extents=(0.025, 0.025, 0.025), face_colors=(0.0, 0.75, 0.75, 0.5))
-    knee_extensor_via_1.translate((0.05, 0, 0.0))
+    knee_extensor_via_1.translate((0.1, 0, 0.0))
     robot_model.tibia.assoc(knee_extensor_via_1, relative_coords='local')
 
     knee_cylinder = skrobot.model.Cylinder(radius=0.04, height=0.08, face_colors=(0.75, 0.75, 0.75, 0.5), with_sdf=True)
@@ -52,7 +52,7 @@ def main():
 
 
     knee_extensor_tendon = Tendon(name='knee_extensor', origin=knee_extensor_femur, insertion=knee_extensor_tibia, via=[knee_extensor_via_0, knee_extensor_via_1], 
-                                  wrap=knee_cylinder, method='Newton')
+                                  wrap=knee_cylinder, method='casadi')
     #knee_extensor_tendon = tendon('knee_extensor', knee_extensor_femur, knee_extensor_tibia, knee_extensor_via_0)
 
     print(knee_extensor_tendon.name)
