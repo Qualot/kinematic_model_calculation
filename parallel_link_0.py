@@ -123,7 +123,7 @@ def main():
     # Ligament add
     ligament = Tendon(name='lcl', origin=attachment_femur_list[5], insertion=attachment_tibia_list[2], 
                       via=[ligament_via_femur, ligament_via_tibia], 
-                      wrap=wrap_target, method='casadi')
+                      wrap=wrap_target, method='newton')
     viewer.add(ligament.line_string)
 
     #view axes for checking
@@ -178,7 +178,7 @@ def main():
 
 
 
-    # # pitch test of ligament sdf length
+    # pitch test of ligament sdf length
     # i_max = 10
     # tibia_num = 2 #selected attachment tibia
     # femur_num = 5 #selected attachment femur
@@ -198,7 +198,7 @@ def main():
     #     robot_ik_model.joint2.joint_angle(alpha - np.pi)
     #     robot_fk_model.joint3.joint_angle(0.0)
     #     ligament.set_line_string()
-    #     #ligament.redraw(viewer)
+    #     ligament.redraw(viewer)
 
     #     tibia_pos = attachment_tibia_list[tibia_num].worldpos()
 
@@ -219,8 +219,8 @@ def main():
 
 
     # pitch-and-yaw test of ligament sdf length
-    i_max = 40
-    j_max = 20  # joint3用の分割数
+    i_max = 10
+    j_max = 10  # joint3用の分割数
     tibia_num = 2  # selected attachment tibia
     femur_num = 5  # selected attachment femur
 
@@ -249,8 +249,15 @@ def main():
             # 固定値(0.0)だったものをループ変数 phi に変更
             robot_fk_model.joint3.joint_angle(phi)
             
+
+            start_time = time.perf_counter()
             ligament.set_line_string()
             # ligament.redraw(viewer)
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time
+            print(f"Elapsed time: {elapsed_time} seconds")
+
+
 
             tibia_pos = attachment_tibia_list[tibia_num].worldpos()
 
