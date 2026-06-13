@@ -113,7 +113,7 @@
   <link name="tibia">
     <visual>
       <geometry>
-        <mesh filename="./tibia.stl" scale="0.001 0.001 0.001"/>
+        <cylinder radius="0.0025" length="0.005"/>
       </geometry>
       <material name="gray">
         <color rgba="0.8 0.8 0.8 0.8"/>
