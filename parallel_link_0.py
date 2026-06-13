@@ -121,7 +121,7 @@ def main():
     wrap_target = SDFWrapWrapper(joint_union_sdf)
 
     # Ligament add
-    ligament = Tendon(name='lcl', origin=attachment_femur_list[0], insertion=attachment_tibia_list[0], 
+    ligament = Tendon(name='lcl', origin=attachment_femur_list[5], insertion=attachment_tibia_list[2], 
                       via=[ligament_via_femur, ligament_via_tibia], 
                       wrap=wrap_target, method='casadi')
     viewer.add(ligament.line_string)
@@ -138,7 +138,7 @@ def main():
 
     viewer.show()
 
-
+    # Pitch test for decision of collateral ligaments
     # i_max = 100
     # n_femur = len(attachment_femur_list)
     # tibia_num = 2
@@ -168,6 +168,106 @@ def main():
 
     #     # print like csv
     #     print(",".join(map(str, row)))
+
+
+    # Pitch test for decision of collateral ligaments
+    # i_max = 100
+    # n_femur = len(attachment_femur_list)
+    # tibia_num = 2
+
+
+
+
+    # # pitch test of ligament sdf length
+    # i_max = 10
+    # tibia_num = 2 #selected attachment tibia
+    # femur_num = 5 #selected attachment femur
+
+    # # Header
+    # header = ["i", "alpha", "beta", "theta", "phi"] + [f"T#{tibia_num}->F#{femur_num}"] + ["sdf_length"]
+    # print(",".join(header))
+
+    # for i in range(i_max):
+    #     alpha = (i_max - i) / i_max * np.pi / 4.0
+    #     beta = beta_acute(alpha)
+    #     theta = -alpha + beta
+
+    #     # joint update
+    #     robot_fk_model.joint2.joint_angle(alpha - np.pi)
+    #     robot_ik_model.joint1.joint_angle(-beta_acute(alpha))
+    #     robot_ik_model.joint2.joint_angle(alpha - np.pi)
+    #     robot_fk_model.joint3.joint_angle(0.0)
+    #     ligament.set_line_string()
+    #     #ligament.redraw(viewer)
+
+    #     tibia_pos = attachment_tibia_list[tibia_num].worldpos()
+
+    #     row = [i, alpha, beta, theta]
+
+    #     femur = attachment_femur_list[femur_num]
+    #     femur_pos = femur.worldpos()
+    #     dist = np.linalg.norm(tibia_pos - femur_pos)
+    #     row.append(dist)
+
+    #     #ligament length from sdf
+    #     row.append(ligament.get_length())
+
+    #     # print like csv
+    #     print(",".join(map(str, row)))
+
+
+
+
+    # pitch-and-yaw test of ligament sdf length
+    i_max = 40
+    j_max = 20  # joint3用の分割数
+    tibia_num = 2  # selected attachment tibia
+    femur_num = 5  # selected attachment femur
+
+    # Header（phiの位置にjoint3の計算値が入るようにします）
+    header = ["i", "alpha", "beta", "theta", "phi"] + [f"T#{tibia_num}->F#{femur_num}"] + ["sdf_length"]
+    print(",".join(header))
+
+    for i in range(i_max):
+        alpha = (i_max - i) / i_max * np.pi / 4.0
+        beta = beta_acute(alpha)
+        theta = -alpha + beta
+
+        # 追加：joint3を -pi/4 から pi/4 まで10段階で回すループ
+        for j in range(j_max):
+            # -pi/4 から pi/4 までを等間隔に分割
+            if j_max > 1:
+                phi = -np.pi / 4.0 + (j / (j_max - 1)) * (np.pi / 2.0)
+            else:
+                phi = 0.0
+
+            # joint update
+            robot_fk_model.joint2.joint_angle(alpha - np.pi)
+            robot_ik_model.joint1.joint_angle(-beta_acute(alpha))
+            robot_ik_model.joint2.joint_angle(alpha - np.pi)
+            
+            # 固定値(0.0)だったものをループ変数 phi に変更
+            robot_fk_model.joint3.joint_angle(phi)
+            
+            ligament.set_line_string()
+            # ligament.redraw(viewer)
+
+            tibia_pos = attachment_tibia_list[tibia_num].worldpos()
+
+            # rowの作成（headerの順番 "i", "alpha", "beta", "theta", "phi" に合わせる）
+            row = [i, alpha, beta, theta, phi]
+
+            femur = attachment_femur_list[femur_num]
+            femur_pos = femur.worldpos()
+            dist = np.linalg.norm(tibia_pos - femur_pos)
+            row.append(dist)
+
+            # ligament length from sdf
+            row.append(ligament.get_length())
+
+            # print like csv
+            print(",".join(map(str, row)))
+
 
     time.sleep(10)
 
