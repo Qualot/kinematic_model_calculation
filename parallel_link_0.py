@@ -1,7 +1,17 @@
 import numpy as np
 import skrobot
+from skrobot.sdf import UnionSDF
 from tendon import Tendon
 import time
+
+
+class SDFWrapWrapper:
+        def __init__(self, sdf):
+            self._sdf = sdf
+        def worldcoords(self):
+            # UnionSDF自体は親を持たないので、基準となる座標（通常は世界座標原点）を返す
+            # 各子SDF（femur/tibia）のworldcoordsは各Linkのassocによって自動更新されます
+            return self._sdf.copy_worldcoords()
 
 
 def beta_acute(alpha):
@@ -25,14 +35,14 @@ def main():
 
     ## Femur link attach
     femur_link = skrobot.model.MeshLink('./urdf/femur_sdf.stl', with_sdf=True)
-    femur_link.set_color([0.0, 0.75, 0.0, 0.5])
+    femur_link.set_color([0.75, 0.75, 0.75, 0.5])
     femur_link.translate((0.0, 0.015, 0.0))
     robot_ik_model.ee_link.assoc(femur_link, relative_coords='local')
     viewer.add(femur_link)
 
     ## Tibia link attach
     tibia_link = skrobot.model.MeshLink('./urdf/tibia_sdf.stl', with_sdf=True)
-    tibia_link.set_color([0.0, 0.75, 0.0, 0.5])
+    tibia_link.set_color([0.75, 0.75, 0.75, 0.5])
     tibia_link.translate((0.0, 0.0, 0.016))
     robot_fk_model.tibia.assoc(tibia_link, relative_coords='local')
     viewer.add(tibia_link)
@@ -73,21 +83,48 @@ def main():
     robot_ik_model.ee_link.assoc(attachment_femur_distant, relative_coords='local')
     attachment_femur_list.append(attachment_femur_distant)
 
-
     for attachment_femur in attachment_femur_list:
         viewer.add(attachment_femur)
 
 
+    ## Ligament via points
+    # Femur side
+    ligament_via_femur = skrobot.model.Box(extents=(0.01, 0.01, 0.01), face_colors=(0.0, 0.75, 0.75, 0.5))
+    ligament_via_femur.translate((0.0, 0.05, 0.0))
+    robot_ik_model.ee_link.assoc(ligament_via_femur, relative_coords='local')
+    viewer.add(ligament_via_femur)
+
+    # Tibia side
+    ligament_via_tibia = skrobot.model.Box(extents=(0.01, 0.01, 0.01), face_colors=(0.0, 0.75, 0.75, 0.5))
+    ligament_via_tibia.translate((0.0, 0.05, 0.0))
+    robot_fk_model.tibia.assoc(ligament_via_tibia, relative_coords='local')
+    viewer.add(ligament_via_tibia)
 
 
     #joint update
-    alpha = np.pi * 1 / 4.0
+    alpha = np.pi * 0.25 / 4.0
     beta = beta_acute(alpha)
     theta = -alpha + beta
 
     robot_fk_model.joint2.joint_angle(alpha - np.pi)
     robot_ik_model.joint1.joint_angle(-beta_acute(alpha))
     robot_ik_model.joint2.joint_angle(alpha - np.pi)
+    robot_fk_model.joint3.joint_angle(-np.pi*1/4)
+
+
+    # 各LinkからSDFの実体を取得（MeshLinkは内部で _sdf を持っています）
+    femur_sdf = femur_link._sdf
+    tibia_sdf = tibia_link._sdf
+
+    # UnionSDF を作成
+    joint_union_sdf = UnionSDF(sdf_list=[femur_sdf, tibia_sdf])
+    wrap_target = SDFWrapWrapper(joint_union_sdf)
+
+    # Ligament add
+    ligament = Tendon(name='lcl', origin=attachment_femur_list[0], insertion=attachment_tibia_list[0], 
+                      via=[ligament_via_femur, ligament_via_tibia], 
+                      wrap=wrap_target, method='casadi')
+    viewer.add(ligament.line_string)
 
     #view axes for checking
     for robot in robots:
