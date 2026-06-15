@@ -118,8 +118,7 @@ class Tendon():
 
     def _init_casadi_solver(self, k_line=1, k_contact=1):
         """
-        既存のソルバー初期化に加えて、ハイブリッド（ニュートンフェーズ）用の
-        SDF勾配・ヘッシアン関数をコンパイルしてキャッシュします。
+        Solver initialization
         """
 
         self.casadi_sdf = convert_to_casadi_sdf(self.wrap._sdf)
@@ -129,7 +128,6 @@ class Tendon():
         p_start_sym = ca.MX.sym('p_start', 3)
         p_end_sym = ca.MX.sym('p_end', 3)
         
-        # --- 1. 既存のIPOPT用 NLP構築 ---
         E_line = 0.0
         p_first = X_sym[0:3]
         E_line += 0.5 * k_line * ca.sumsqr(p_first - p_start_sym)
@@ -149,30 +147,35 @@ class Tendon():
 
         objective = E_line + E_contact
         nlp = {'x': X_sym, 'f': objective, 'p': ca.vcat([p_start_sym, p_end_sym])}
-        opts = {'ipopt.print_level': 0, 'ipopt.max_iter': 200, 'ipopt.tol': 1e-8}
+        opts = {
+            'print_time': False, 
+            'ipopt.print_level': 0, 
+            'ipopt.max_iter': 200, 
+            'ipopt.tol': 1e-8,
+            
+            'ipopt.delta': 0.05,
+            'ipopt.acceptable_obj_change_tol': 1e-4,
+        }
         self.casadi_solver = ca.nlpsol('solver', 'ipopt', nlp, opts)
-
-        # --- 2. ハイブリッド用：1点ずつのSDF、勾配、ヘッシアン関数のコンパイル ---
-        p_single = ca.MX.sym('p_single', 3)
-        sdf_single = self.casadi_sdf(p_single)
-        grad_single = ca.jacobian(sdf_single, p_single).T
-        hess_single, _ = ca.hessian(sdf_single, p_single)
-
-        # 関数名（第1引数）をユニークで予約語に被らない名称に変更
-        self.f_sdf = ca.Function('calc_sdf', [p_single], [sdf_single])
-        self.f_grad = ca.Function('calc_grad', [p_single], [grad_single])
-        self.f_hess = ca.Function('calc_hess', [p_single], [hess_single])
 
     def wrap_calculation_casadi(self, init_points, p_start, p_end):
         """
         Fast method to call the pre-compiled CasADi solver.
         """
-        # if self.casadi_solver is None:
-        self._init_casadi_solver()
+
+        try:
+            current_pose = self.wrap.worldcoords().T() 
+        except AttributeError:
+            current_pose = id(self.wrap._sdf)
+
+        # initialize solver for the initial use or the pose change
+        if (self.casadi_solver is None) or (not hasattr(self, '_prev_pose')) or (not np.allclose(self._prev_pose, current_pose)):
+            self._init_casadi_solver()
+            self._prev_pose = current_pose.copy() if isinstance(current_pose, np.ndarray) else current_pose
             
         p_param = np.concatenate([p_start, p_end])
         
-        # Execute solver (pass the previous optimization results or the straight line as init_points)
+        # solver execute
         sol = self.casadi_solver(x0=init_points.flatten(), p=p_param)
         x_opt = np.array(sol['x']).flatten()
         
